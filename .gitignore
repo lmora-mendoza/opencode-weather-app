@@ -1,6 +1,8 @@
 # dependencies (bun install)
 node_modules
 
+# build output
+weather-cli.exe
 # output
 out
 dist
