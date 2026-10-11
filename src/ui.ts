@@ -1,14 +1,15 @@
 import { createInterface, type Interface } from "node:readline/promises";
 import { stdin, stdout } from "node:process";
-import type { AppConfig, City } from "./types.ts";
+import type { AppConfig, City, TemperatureUnit } from "./types.ts";
 import { unitLabel } from "./types.ts";
+import { cyan, green, red, yellow } from "./colors.ts";
 
 const LINE = "════════════════════════════════════════";
 
 export function printMenu(config: AppConfig): void {
-  console.log(LINE);
-  console.log("         WEATHER CLI");
-  console.log(LINE);
+  console.log(cyan(LINE));
+  console.log(cyan("         WEATHER CLI"));
+  console.log(cyan(LINE));
   console.log("  1. Clima de ciudad default");
   console.log(`  2. Clima de todas las ciudades (${config.cities.length})`);
   console.log("  3. Buscar y agregar ciudad");
@@ -16,7 +17,7 @@ export function printMenu(config: AppConfig): void {
   console.log("  5. Establecer ciudad default");
   console.log(`  8. Ajustes (${unitLabel(config.unit)})`);
   console.log("  9. Salir");
-  console.log(LINE);
+  console.log(cyan(LINE));
 }
 
 export function createPrompt(): Interface {
@@ -42,7 +43,19 @@ export function formatCity(city: City): string {
 
 export function printCities(cities: City[], defaultIndex: number | null): void {
   cities.forEach((city, index) => {
-    const mark = index === defaultIndex ? " [default]" : "";
+    const mark = index === defaultIndex ? ` ${cyan("[default]")}` : "";
     console.log(`  ${index + 1}. ${formatCity(city)}${mark}`);
   });
+}
+
+export function printTemperature(city: City, temperature: number, unit: TemperatureUnit): void {
+  console.log(`  ${formatCity(city)}: ${yellow(`${temperature} ${unitLabel(unit)}`)}`);
+}
+
+export function printSuccess(message: string): void {
+  console.log(green(`  ${message}`));
+}
+
+export function printError(message: string): void {
+  console.log(red(`  ${message}`));
 }

@@ -10,26 +10,29 @@ import {
   formatCity,
   pause,
   printCities,
+  printError,
   printMenu,
+  printSuccess,
+  printTemperature,
 } from "./src/ui.ts";
 
 async function showDefaultWeather(config: AppConfig): Promise<void> {
   const city = getDefaultCity(config);
   if (!city) {
-    console.log("  No hay ciudad default. Usa la opción 3 o 5.");
+    printError("No hay ciudad default. Usa la opción 3 o 5.");
     return;
   }
   try {
     const temperature = await getTemperature(city, config.unit);
-    console.log(`  ${formatCity(city)}: ${temperature} ${unitLabel(config.unit)}`);
+    printTemperature(city, temperature, config.unit);
   } catch {
-    console.log("  No se pudo obtener el clima. Revisa tu conexión.");
+    printError("No se pudo obtener el clima. Revisa tu conexión.");
   }
 }
 
 async function showAllWeather(config: AppConfig): Promise<void> {
   if (config.cities.length === 0) {
-    console.log("  No hay ciudades guardadas. Usa la opción 3.");
+    printError("No hay ciudades guardadas. Usa la opción 3.");
     return;
   }
   const results = await Promise.allSettled(
@@ -38,9 +41,9 @@ async function showAllWeather(config: AppConfig): Promise<void> {
   results.forEach((result, index) => {
     const city = config.cities[index] as City;
     if (result.status === "fulfilled") {
-      console.log(`  ${formatCity(city)}: ${result.value} ${unitLabel(config.unit)}`);
+      printTemperature(city, result.value, config.unit);
     } else {
-      console.log(`  ${formatCity(city)}: error`);
+      printError(`${formatCity(city)}: error`);
     }
   });
 }
@@ -52,11 +55,11 @@ async function addCity(prompt: Interface, config: AppConfig): Promise<void> {
   try {
     found = await searchCities(query);
   } catch {
-    console.log("  Error de red buscando la ciudad.");
+    printError("Error de red buscando la ciudad.");
     return;
   }
   if (found.length === 0) {
-    console.log("  Sin resultados.");
+    printError("Sin resultados.");
     return;
   }
   printCities(found, null);
@@ -65,18 +68,18 @@ async function addCity(prompt: Interface, config: AppConfig): Promise<void> {
   if (!Number.isInteger(selected + 1) || choice === "0") return;
   const city = found[selected];
   if (!city) {
-    console.log("  Selección inválida.");
+    printError("Selección inválida.");
     return;
   }
   config.cities.push(city);
   if (config.defaultIndex === null) config.defaultIndex = 0;
   await saveConfig(config);
-  console.log(`  Agregada: ${formatCity(city)}`);
+  printSuccess(`Agregada: ${formatCity(city)}`);
 }
 
 async function removeCity(prompt: Interface, config: AppConfig): Promise<void> {
   if (config.cities.length === 0) {
-    console.log("  No hay ciudades para eliminar.");
+    printError("No hay ciudades para eliminar.");
     return;
   }
   printCities(config.cities, config.defaultIndex);
@@ -85,7 +88,7 @@ async function removeCity(prompt: Interface, config: AppConfig): Promise<void> {
   if (choice === "0") return;
   const city = config.cities[index];
   if (!city) {
-    console.log("  Selección inválida.");
+    printError("Selección inválida.");
     return;
   }
   config.cities.splice(index, 1);
@@ -96,12 +99,12 @@ async function removeCity(prompt: Interface, config: AppConfig): Promise<void> {
     else if (config.defaultIndex > index) config.defaultIndex -= 1;
   }
   await saveConfig(config);
-  console.log(`  Eliminada: ${formatCity(city)}`);
+  printSuccess(`Eliminada: ${formatCity(city)}`);
 }
 
 async function setDefaultCity(prompt: Interface, config: AppConfig): Promise<void> {
   if (config.cities.length === 0) {
-    console.log("  No hay ciudades. Usa la opción 3.");
+    printError("No hay ciudades. Usa la opción 3.");
     return;
   }
   printCities(config.cities, config.defaultIndex);
@@ -109,18 +112,18 @@ async function setDefaultCity(prompt: Interface, config: AppConfig): Promise<voi
   const index = Number(choice) - 1;
   if (choice === "0") return;
   if (!config.cities[index]) {
-    console.log("  Selección inválida.");
+    printError("Selección inválida.");
     return;
   }
   config.defaultIndex = index;
   await saveConfig(config);
-  console.log(`  Default: ${formatCity(config.cities[index] as City)}`);
+  printSuccess(`Default: ${formatCity(config.cities[index] as City)}`);
 }
 
 async function toggleUnit(config: AppConfig): Promise<void> {
   config.unit = config.unit === "celsius" ? "fahrenheit" : "celsius";
   await saveConfig(config);
-  console.log(`  Unidad actual: ${unitLabel(config.unit)}`);
+  printSuccess(`Unidad actual: ${unitLabel(config.unit)}`);
 }
 
 async function main(): Promise<void> {
@@ -156,7 +159,7 @@ async function main(): Promise<void> {
         running = false;
         break;
       default:
-        console.log("  Opción inválida.");
+        printError("Opción inválida.");
         break;
     }
 
