@@ -8,6 +8,12 @@ export interface City {
   longitude: number;
 }
 
+export interface DailyForecast {
+  date: string;
+  max: number;
+  min: number;
+}
+
 export interface AppConfig {
   cities: City[];
   defaultIndex: number | null;

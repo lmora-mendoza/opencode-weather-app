@@ -8,5 +8,10 @@
   },
   "peerDependencies": {
     "typescript": "^7"
+  },
+  "scripts": {
+    "dev": "bun run index.ts --watch", 
+    "build": "bun build --compile index.ts --outfile weather-cli", 
+    "start": "bun run index.ts" 
   }
 }

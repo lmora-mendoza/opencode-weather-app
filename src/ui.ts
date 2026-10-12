@@ -1,6 +1,6 @@
 import { createInterface, type Interface } from "node:readline/promises";
 import { stdin, stdout } from "node:process";
-import type { AppConfig, City, TemperatureUnit } from "./types.ts";
+import type { AppConfig, City, DailyForecast, TemperatureUnit } from "./types.ts";
 import { unitLabel } from "./types.ts";
 import { cyan, green, red, yellow } from "./colors.ts";
 
@@ -15,6 +15,7 @@ export function printMenu(config: AppConfig): void {
   console.log("  3. Buscar y agregar ciudad");
   console.log("  4. Eliminar ciudad");
   console.log("  5. Establecer ciudad default");
+  console.log("  6. Pronóstico 7 días (default)");
   console.log(`  8. Ajustes (${unitLabel(config.unit)})`);
   console.log("  9. Salir");
   console.log(cyan(LINE));
@@ -50,6 +51,13 @@ export function printCities(cities: City[], defaultIndex: number | null): void {
 
 export function printTemperature(city: City, temperature: number, unit: TemperatureUnit): void {
   console.log(`  ${formatCity(city)}: ${yellow(`${temperature} ${unitLabel(unit)}`)}`);
+}
+
+export function printForecast(city: City, days: DailyForecast[], unit: TemperatureUnit): void {
+  console.log(`  ${formatCity(city)}:`);
+  for (const day of days) {
+    console.log(`    ${day.date}: ${yellow(`${day.max} / ${day.min} ${unitLabel(unit)}`)}`);
+  }
 }
 
 export function printSuccess(message: string): void {

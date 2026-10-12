@@ -1,7 +1,7 @@
 import type { Interface } from "node:readline/promises";
 import type { AppConfig, City } from "./src/types.ts";
 import { getDefaultCity, unitLabel } from "./src/types.ts";
-import { getTemperature, searchCities } from "./src/api.ts";
+import { getDailyForecast, getTemperature, searchCities } from "./src/api.ts";
 import { loadConfig, saveConfig } from "./src/storage.ts";
 import {
   askOption,
@@ -11,6 +11,7 @@ import {
   pause,
   printCities,
   printError,
+  printForecast,
   printMenu,
   printSuccess,
   printTemperature,
@@ -120,6 +121,20 @@ async function setDefaultCity(prompt: Interface, config: AppConfig): Promise<voi
   printSuccess(`Default: ${formatCity(config.cities[index] as City)}`);
 }
 
+async function showForecast(config: AppConfig): Promise<void> {
+  const city = getDefaultCity(config);
+  if (!city) {
+    printError("No hay ciudad default. Usa la opción 3 o 5.");
+    return;
+  }
+  try {
+    const days = await getDailyForecast(city, config.unit);
+    printForecast(city, days, config.unit);
+  } catch {
+    printError("No se pudo obtener el pronóstico. Revisa tu conexión.");
+  }
+}
+
 async function toggleUnit(config: AppConfig): Promise<void> {
   config.unit = config.unit === "celsius" ? "fahrenheit" : "celsius";
   await saveConfig(config);
@@ -151,6 +166,9 @@ async function main(): Promise<void> {
         break;
       case "5":
         await setDefaultCity(prompt, config);
+        break;
+      case "6":
+        await showForecast(config);
         break;
       case "8":
         await toggleUnit(config);

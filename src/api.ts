@@ -1,4 +1,4 @@
-import type { City, TemperatureUnit } from "./types.ts";
+import type { City, DailyForecast, TemperatureUnit } from "./types.ts";
 
 interface GeocodingResult {
   name: string;
@@ -14,6 +14,11 @@ interface GeocodingResponse {
 
 interface ForecastResponse {
   current?: { temperature_2m?: number };
+  daily?: {
+    time?: string[];
+    temperature_2m_max?: number[];
+    temperature_2m_min?: number[];
+  };
 }
 
 export async function searchCities(query: string): Promise<City[]> {
@@ -47,4 +52,30 @@ export async function getTemperature(
   const temperature = data.current?.temperature_2m;
   if (typeof temperature !== "number") throw new Error("Sin temperatura");
   return temperature;
+}
+
+export async function getDailyForecast(
+  city: City,
+  unit: TemperatureUnit,
+): Promise<DailyForecast[]> {
+  const url =
+    `https://api.open-meteo.com/v1/forecast` +
+    `?latitude=${city.latitude}&longitude=${city.longitude}` +
+    `&daily=temperature_2m_max,temperature_2m_min` +
+    `&timezone=auto&forecast_days=7&temperature_unit=${unit}`;
+  const response = await fetch(url);
+  if (!response.ok) throw new Error(`Forecast HTTP ${response.status}`);
+  const data = (await response.json()) as ForecastResponse;
+  const dates = data.daily?.time;
+  const maxValues = data.daily?.temperature_2m_max;
+  const minValues = data.daily?.temperature_2m_min;
+  if (!dates || !maxValues || !minValues) throw new Error("Sin pronóstico");
+  return dates.map((date, index) => {
+    const max = maxValues[index];
+    const min = minValues[index];
+    if (typeof max !== "number" || typeof min !== "number") {
+      throw new Error("Sin pronóstico");
+    }
+    return { date, max, min };
+  });
 }
