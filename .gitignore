@@ -2,7 +2,9 @@
 node_modules
 
 # build output
+weather-cli
 weather-cli.exe
+weather-cli-*
 # output
 out
 dist
