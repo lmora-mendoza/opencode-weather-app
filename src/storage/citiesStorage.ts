@@ -1,9 +1,10 @@
 import { homedir } from "node:os";
 import { join } from "node:path";
-import type { AppConfig } from "./types.ts";
-import { createDefaultConfig } from "./types.ts";
+import type { AppConfig } from "../types/Config.ts";
+import { createDefaultConfig } from "../types/Config.ts";
+import { CONFIG_FILE_NAME } from "../utils/constants.ts";
 
-const CONFIG_PATH = join(homedir(), ".weather-cli.json");
+const CONFIG_PATH = join(homedir(), CONFIG_FILE_NAME);
 
 export function getConfigPath(): string {
   return CONFIG_PATH;

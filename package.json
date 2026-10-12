@@ -1,6 +1,6 @@
 {
   "name": "02---wheather",
-  "module": "index.ts",
+  "module": "src/index.ts",
   "type": "module",
   "private": true,
   "devDependencies": {
@@ -10,8 +10,8 @@
     "typescript": "^7"
   },
   "scripts": {
-    "dev": "bun run index.ts --watch", 
-    "build": "bun build --compile index.ts --outfile weather-cli", 
-    "start": "bun run index.ts" 
+    "dev": "bun run src/index.ts --watch", 
+    "build": "bun build --compile src/index.ts --outfile weather-cli", 
+    "start": "bun run src/index.ts" 
   }
 }
