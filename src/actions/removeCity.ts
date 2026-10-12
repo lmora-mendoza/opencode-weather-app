@@ -1,6 +1,7 @@
 import type { Interface } from "node:readline/promises";
 import type { AppConfig } from "../types/Config.ts";
 import { saveConfig } from "../storage/citiesStorage.ts";
+import { nextDefaultIndexAfterRemove } from "../utils/cityIndex.ts";
 import { askText } from "../presentation/input.ts";
 import { printCities, printError, printSuccess } from "../presentation/output.ts";
 import { formatCity } from "../utils/format.ts";
@@ -20,12 +21,11 @@ export async function removeCity(prompt: Interface, config: AppConfig): Promise<
     return;
   }
   config.cities.splice(index, 1);
-  if (config.cities.length === 0) {
-    config.defaultIndex = null;
-  } else if (config.defaultIndex !== null) {
-    if (config.defaultIndex === index) config.defaultIndex = 0;
-    else if (config.defaultIndex > index) config.defaultIndex -= 1;
-  }
+  config.defaultIndex = nextDefaultIndexAfterRemove(
+    config.cities.length,
+    config.defaultIndex,
+    index,
+  );
   await saveConfig(config);
   printSuccess(`Eliminada: ${formatCity(city)}`);
 }
